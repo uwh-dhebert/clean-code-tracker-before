@@ -1,0 +1,7 @@
+﻿###
+GET http://localhost:3001/api/chapters
+Content-Type: application/json
+
+###
+GET http://localhost:3001/api/chapters/1
+Content-Type: application/json
