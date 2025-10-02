@@ -39,7 +39,8 @@ app.get('/api/chapters', (req, res) => {
     const limit = parseInt(req.query.limit) || 5;
     const start = (page - 1) * limit;
     const end = start + limit;
-    res.json({ data: chapters.slice(start, end), total: chapters.length });
+    const data = start < chapters.length ? chapters.slice(start, end) : [];
+    res.json({ data, total: chapters.length });
 });
 
 app.patch('/api/chapters/:id', (req, res) => {

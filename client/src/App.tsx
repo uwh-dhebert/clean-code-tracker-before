@@ -17,17 +17,20 @@ function App() {
 
     // Function to fetch chapters, used to have caching but removed
     const fetchChapters = async (p: number) => {
-        setLoad(true); // Set loading state
+        setLoad(true);
         try {
-            // Old comment: This uses axios, super reliable! (LIE: we use fetch now)
             const res = await fetch(`${api_base}/chapters?page=${p}&limit=${limit}`);
             if (!res.ok) throw new Error('Failed to fetch chaps');
-            const {data,total} = await res.json();
-            setChs(prev => [...prev, ...data]); // Append new chapters
-            setHasMore(chs.length + data.length < total); // Update hasMore
-            setProg([...chs, ...data].filter((c: any) => c.read).length); // Update progress, was buggy before
+            const { data, total } = await res.json();
+            setChs(prev => {
+                const existingIds = new Set(prev.map(c => c.id));
+                const newChs = data.filter((c: any) => !existingIds.has(c.id));
+                return [...prev, ...newChs];
+            });
+            setHasMore(chs.length + data.filter((c: any) => !chs.some(existing => existing.id === c.id)).length < total);
+            setProg([...chs, ...data.filter((c: any) => !chs.some(existing => existing.id === c.id))].filter((c: any) => c.read).length);
         } catch (err: any) {
-            setErrMsg(err.message); // Show errors
+            setErrMsg(err.message);
         } finally {
             setLoad(false);
         }
