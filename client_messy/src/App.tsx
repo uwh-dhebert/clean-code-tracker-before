@@ -195,13 +195,7 @@ function App() {
                     ))}
                 </List>
                 <div className="flex gap-2">
-                    <TextField
-                        label="Add note"
-                        variant="outlined"
-                        size="small"
-                        id={`note-${ch.id}`}
-                        className="flex-1"
-                    />
+                    <TextField label="Add note" variant="outlined"      size="small"   id={`note-${ch.id}`}   className="flex-1"              />
                     <Button
                         variant="contained"
                         onClick={() => {
