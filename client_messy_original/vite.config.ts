@@ -12,9 +12,4 @@ export default defineConfig({
             include: ['src/*.tsx'],
         },
     },
-    server: {
-        proxy: {
-            '/api': 'http://localhost:3001',
-        },
-    },
 });

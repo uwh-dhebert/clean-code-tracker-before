@@ -12,5 +12,6 @@ export const Header: React.FC<HeaderProps> = ({ progress, total = 17 }) => (
         <Typography variant="h4" className="font-bold">Clean Code Reading Tracker - Refactored</Typography>
         <Typography>Progress: {progress}/{total} chapters read</Typography>
         <MuiLink component={Link} to="/" className="text-blue-500">Back to List</MuiLink>
+        <Link to="/slide/Clean_Code_Book_Summary_Slides.markdown" className="text-blue-500">View Slide</Link>
     </div>
 );

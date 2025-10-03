@@ -3,14 +3,23 @@
 const apiBase = 'http://localhost:3001/api'; // API base URL, change if server moves
 
 export const FetchParams = {
-    pageParam: 1,
-    limit: 5
-}
+    pageParam: 1
+};
 
-export const fetchChapters = async ({ pageParam, limit }= FetchParams): Promise<ChaptersResponse> => {
+export const fetchChapters = async ({ pageParam }= FetchParams): Promise<ChaptersResponse> => {
+    const limit = 5;
     const res = await fetch(`${apiBase}/chapters?page=${pageParam}&limit=${limit}`);
     if (!res.ok) throw new Error('Failed to fetch chapters');
     return await res.json();
+};
+
+export const fetchSlide = async (slideName: string): Promise<string> => {
+   console.log("Fetch Slide " + slideName);
+    if (!slideName) throw new Error('No slide name provided');
+    const res = await fetch(`/api/slide/${slideName}`);
+    console.log(res.text());
+    if (!res.ok) throw new Error('File not found');
+    return res.text();
 };
 
 export const fetchChapter = async ({ id }: { id: string }): Promise<Chapter> => {

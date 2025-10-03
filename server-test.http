@@ -5,3 +5,6 @@ Content-Type: application/json
 ###
 GET http://localhost:3001/api/chapters/1
 Content-Type: application/json
+
+###
+GET http://localhost:3001/api/slide/Clean_Code_Book_Summary_Slides.markdown

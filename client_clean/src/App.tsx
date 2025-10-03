@@ -3,6 +3,8 @@ import { Routes, Route } from 'react-router-dom';
 import { Header } from './components/Header';
 import { ChapterListPage } from './pages/ChapterListPage';
 import { ChapterDetailPage } from './pages/ChapterDetailPage';
+import { SlideDeckDisplay } from './pages/SlideDeckDisplay.tsx';
+
 import { useChapters } from './hooks/useChapters';
 import './App.css';
 
@@ -42,6 +44,16 @@ function App() {
                     path="/chapter/:id"
                     element={
                         <ChapterDetailPage
+                            progress={progress}
+                            toggleRead={toggleRead}
+                            addNote={addNote}
+                        />
+                    }
+                />
+                <Route
+                    path="/slide/:slideName"
+                    element={
+                        <SlideDeckDisplay
                             progress={progress}
                             toggleRead={toggleRead}
                             addNote={addNote}
