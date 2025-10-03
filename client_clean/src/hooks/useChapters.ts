@@ -2,15 +2,22 @@
 import { fetchChapters, toggleRead, addNote } from '../api/chapters';
 import type { ChaptersResponse } from '../types';
 
-
-
 export const useChapters = () => {
     const queryClient = useQueryClient();
 
-    const { data, fetchNextPage, hasNextPage, isLoading, isFetchingNextPage, error } = useInfiniteQuery<ChaptersResponse>({
+    const {
+        data,
+        fetchNextPage,
+        hasNextPage,
+        isLoading,
+        isFetchingNextPage,
+        error,
+    } = useInfiniteQuery<ChaptersResponse, Error, ChaptersResponse, ['chapters'], number>({
         queryKey: ['chapters'],
-        queryFn: ({ pageParam = 1 }) => fetchChapters(pageParam), // Correct signature
-        getNextPageParam: (lastPage, allPages) => lastPage.data.length > 0 ? allPages.length + 1 : undefined,
+        queryFn: ({ pageParam = 1 }) => fetchChapters(pageParam),
+        getNextPageParam: (lastPage, allPages) =>
+            lastPage.data.length > 0 ? allPages.length + 1 : undefined,
+        initialPageParam: 1,
     });
 
     const toggleMutation = useMutation({
@@ -29,7 +36,6 @@ export const useChapters = () => {
         },
     });
 
-
     return {
         chapters: data?.pages.flatMap(page => page.data) || [],
         progress: data?.pages.flatMap(page => page.data).filter(c => c.read).length || 0,
@@ -42,4 +48,3 @@ export const useChapters = () => {
         error,
     };
 };
-
