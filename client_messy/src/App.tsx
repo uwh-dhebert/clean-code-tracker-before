@@ -3,7 +3,7 @@ import { Routes, Route, Link, useParams, useNavigate } from 'react-router-dom';
 import { Typography, Accordion, AccordionSummary, AccordionDetails, Switch, TextField, Button, List, ListItem, ListItemText, Link as MuiLink, Box, Paper } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import axios from 'axios'; // TODO: use axios later for better fetching
-
+// TODO: This is a mess we need to clean it up
 function App() {
     // State for chapters list, very messy but works
     const [chs, setChs] = useState<any[]>([]);
@@ -143,11 +143,9 @@ function App() {
         useEffect(() => {
             const loadCh = async () => {
                 try {
-                    console.log('Fetching ch with ID:', id); // Debug log
                     const res = await fetch(`${api_base}/chapters/${id}`);
                     if (!res.ok) throw new Error(`Failed to fetch ch ${id}`);
                     const data = await res.json();
-                    console.log('Ch data:', data); // Debug log
                     setCh(data);
                 } catch (err: any) {
                     setErr(err.message);
