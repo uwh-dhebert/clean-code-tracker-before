@@ -1,25 +1,23 @@
-import React, {useState, useEffect   } from 'react';
+import {useState, useEffect   } from 'react';
 import { Routes, Route, Link, useParams, useNavigate } from 'react-router-dom';
-import { Typography, Accordion, AccordionSummary, AccordionDetails, Switch, TextField, Button, List, ListItem, ListItemText, Link as MuiLink, Box, Paper } from '@mui/material';
+import { Typography, Accordion, AccordionSummary, AccordionDetails, Switch, TextField, Button, List, ListItem, ListItemText, Link as MuiLink} from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import axios from 'axios'; // TODO: use axios later for better fetching
-// TODO: This is a mess we need to clean it up
+
 function App() {
-    // State for chapters list, very messy but works
     const [chs, setChs] = useState<any[]>([]);
     const [load, setLoad] = useState<boolean>(true);
-    const [pg, setPg] = useState<number>(1); // Page for infinite scroll
-    const [has_more, setHasMore] = useState<boolean>(true); // Checks if more pages exist
-    const [prog, setProg] = useState<number>(0); // Tracks read chapters
-    const [err_msg, setErrMsg] = useState<string | null>(null); // Error handling, added recently
-    const limit=5; // Hardcoded limit for pagination
-    const api_base = 'http://localhost:3001/api'; // API base URL, change if server moves
+    const [infinite_scroll_page, setInfinite_scroll_page] = useState<number>(1);
+    const [has_more_pages, setHas_more_pages] = useState<boolean>(true);
+    const [chapters_read_progress, setChapters_read_progress] = useState<number>(0);
+    const [err_msg, setErrMsg] = useState<string | null>(null);
+    const infinite_scroll_page_limit=5;
+    const api_base = 'http://localhost:3001/api';
 
-    // Function to fetch chapters, used to have caching but removed
+
     const fetchChapters = async (p: number) => {
         setLoad(true);
         try {
-            const res = await fetch(`${api_base}/chapters?page=${p}&limit=${limit}`);
+            const res = await fetch(`${api_base}/chapters?page=${p}&limit=${infinite_scroll_page_limit}`);
             if (!res.ok) throw new Error('Failed to fetch chaps');
             const { data, total } = await res.json();
             setChs(prev => {
@@ -27,8 +25,8 @@ function App() {
                 const newChs = data.filter((c: any) => !existingIds.has(c.id));
                 return [...prev, ...newChs];
             });
-            setHasMore(chs.length + data.filter((c: any) => !chs.some(existing => existing.id === c.id)).length < total);
-            setProg([...chs, ...data.filter((c: any) => !chs.some(existing => existing.id === c.id))].filter((c: any) => c.read).length);
+            setHas_more_pages(chs.length + data.filter((c: any) => !chs.some(existing => existing.id === c.id)).length < total);
+            setChapters_read_progress([...chs, ...data.filter((c: any) => !chs.some(existing => existing.id === c.id))].filter((c: any) => c.read).length);
         } catch (err: any) {
             setErrMsg(err.message);
         } finally {
@@ -36,22 +34,21 @@ function App() {
         }
     };
 
-    // Load chapters on page change
     useEffect(() => {
-        fetchChapters(pg);
-    },[pg]);
+        fetchChapters(infinite_scroll_page);
+    },[infinite_scroll_page]);
 
     // Infinite scroll listener, added in v1, never updated
     useEffect(() => {
         const handleScroll = () => {
             // Old comment: This is debounced for performance (LIE: no debouncing here)
-            if (window.innerHeight + document.documentElement.scrollTop >= document.documentElement.offsetHeight - 100 && has_more && !load) {
-                setPg(prev => prev + 1);
+            if (window.innerHeight + document.documentElement.scrollTop >= document.documentElement.offsetHeight - 100 && has_more_pages && !load) {
+                setInfinite_scroll_page(prev => prev + 1);
             }
         };
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
-    }, [has_more, load]);
+    }, [has_more_pages, load]);
 
     // Toggle read status, used to sync with local storage (LIE: never had local storage)
     const handle_toggle_read = async (id_num: number, currRead: boolean) => {
@@ -69,13 +66,12 @@ function App() {
                 return updated;
             });
             // Fixed: Adjust progress by 1 based on toggle
-            setProg(chs.filter((c: any) => c.read).length + (!currRead ? 1 : -1));
+            setChapters_read_progress(chs.filter((c: any) => c.read).length + (!currRead ? 1 : -1));
         } catch (err: any) {
             setErrMsg(err.message);
         }
     };
 
-    // Add note to chapter, super simple (LIE: this is messy with DOM manipulation)
     const add_note = async (id_num: number, note_txt: string) => {
         if (!note_txt) return;
         try {
@@ -105,8 +101,7 @@ function App() {
         </div>
     );
 
-    // Chapter list component, renders all chapters (LIE: used to support filtering)
-    const ChList = ({chs, onToggleRead, onAddNote, prog, total_chaps = 17 }: any) => (
+    const ChList = ({chs, onToggleRead, prog, total_chaps = 17 }: any) => (
         <div className="space-y-4">
             <Typography variant="h5">Chapters</Typography>
             {chs.map((ch: any) => (
@@ -172,9 +167,9 @@ function App() {
                     <AccordionDetails>
                         <List>
                             {ch.cliffnotes.map((note: string, i: number) => (
-                                <ListItem key={i}>
-                                    <ListItemText primary={note} />
-                                </ListItem>
+                            <ListItem key={i}>
+                            <ListItemText primary={note} />
+                            </ListItem>
                             ))}
                         </List>
                     </AccordionDetails>
@@ -229,12 +224,12 @@ function App() {
             <Routes>
                 <Route path="/" element={
                     <>
-                        <Header prog={prog} />
+                        <Header prog={chapters_read_progress} />
                         <ChList
                             chs={chs}
                             onToggleRead={handle_toggle_read}
                             onAddNote={add_note}
-                            prog={prog}
+                            prog={chapters_read_progress}
                         />
                     </>
                 } />
@@ -242,7 +237,7 @@ function App() {
                     <ChDetail
                         onToggleRead={handle_toggle_read}
                         onAddNote={add_note}
-                        prog={prog}
+                        prog={chapters_read_progress}
                     />
                 } />
             </Routes>
